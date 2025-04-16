@@ -1,7 +1,8 @@
-import React from 'react'
 
-export default function Countries() {
-  return (
+ import React from 'react'
+ 
+ export default function UserRecords() {
+   return (
     <>
      <div class="p-7 space-y-4 m-4 bg-white">
     <div class="flex justify-between px-3 gap-7 w-full">
@@ -47,7 +48,8 @@ export default function Countries() {
           <tr class="bg-gray-50 text-gray-500">
             <th class="border-gray-200 border-2 px-4 py-2"><input type="checkbox" /></th>
             <th class="border-gray-200 border-2 px-4 py-2">Name</th>
-            <th class="border-gray-200 border-2 px-4 py-2">orders</th>
+            <th class="border-gray-200 border-2 px-4 py-2">Email</th>
+            <th class="border-gray-200 border-2 px-4 py-2">Phone</th>
             <th class="border-gray-200 border-2 px-4 py-2">Status</th>
             <th class="border-gray-200 border-2 px-4 py-2">Action</th>
           </tr>
@@ -56,9 +58,9 @@ export default function Countries() {
           {/* <!-- Sample row --> */}
           <tr class="text-center text-gray-500">
             <td class="border px-4 py-2"><input type="checkbox" /></td>
-            <td class="border-gray-200 border-2 px-4 py-2">india</td>
-            <td class="border-gray-200 border-2 px-4 py-2">5</td>
-
+            <td class="border-gray-200 border-2 px-4 py-2">John Doe</td>
+            <td class="border-gray-200 border-2 px-4 py-2">john@example.com</td>
+            <td class="border-gray-200 border-2 px-4 py-2">1234567890</td>
             <td class="border-gray-200 border-2 px-4 py-2"><span class="bg-green-400 text-white px-2.5 rounded-2xl font-bold">Active</span></td>
             <td class="border-gray-200 border-2 px-4 py-2 text-green-600">✏️</td>
           </tr>
@@ -81,5 +83,6 @@ export default function Countries() {
 
 
     </>
-  )
-}
+   )
+ }
+ 

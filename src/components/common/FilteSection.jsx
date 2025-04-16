@@ -21,6 +21,7 @@ export default function FilteSection({ clickhandler, setfilter, filter }) {
     
     return (
         <>
+        
             <div className={`p-7 ${(clickhandler) ? ' duration-700 ' : '  hidden'} space-y-4 m-4 bg-white`}>
                 <div className="grid lg:grid-cols-[22%_22%_22%_13%_auto] md:grid-cols-3 justify-centerś gap-5">
                     <form onSubmit={() => filterResults(event)} className='flex gap-6'>

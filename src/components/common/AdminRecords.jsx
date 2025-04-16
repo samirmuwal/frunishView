@@ -2,6 +2,9 @@ import React, { useContext, useEffect, useState } from 'react'
 import { MdAutoDelete } from "react-icons/md";
 import { BiTransfer } from "react-icons/bi";
 import { TbFileTypeCsv } from "react-icons/tb";
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
+
 import { MdOutlinePictureAsPdf } from "react-icons/md";
 import { BiSolidEdit } from "react-icons/bi";
 import { IoIosArrowDown } from "react-icons/io";
@@ -41,10 +44,12 @@ export default function AdminRecords({ filter, isOpen, setisOpen, detailData, se
             }).catch(() => {
             })
     }, [search, flag, limit, page])
+
     let editData = (data) => {
         setisOpen(true)
         setdetailData(data)
     }
+
     const searchHandler = ((event) => {
         setSearch(event.target.value)
     })
@@ -68,6 +73,7 @@ export default function AdminRecords({ filter, isOpen, setisOpen, detailData, se
             setcheckBox(data);
         }
     };
+
     const indexCheckBox = () => {
 
         if (checkBox.length != data.length) {
@@ -79,11 +85,91 @@ export default function AdminRecords({ filter, isOpen, setisOpen, detailData, se
         }
         else { setcheckBox([]) }
     }
-    const deleteHandler = ()=>{
-        axios.post('http://localhost:1007/api/website/auth/admin-delete',checkBox).then((res)=>{
-            console.log(res)
-        })
+
+    const DownloadCSV = async () => {
+        
+        const filteredData = data.map(({ _id, status, password, ...rest }) => ({
+            ...rest,
+            password: password
+        }));
+
+        const headers = Object.keys(filteredData[0]).join(",") + "\n";
+        const rows = filteredData.map(row => Object.values(row).join(",")).join("\n");
+
+        const csvContent = headers + rows;
+
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'filtered_data.csv';
+        link.click();
+
+        URL.revokeObjectURL(url); //
     }
+
+    const DownloadPdf = async () => {
+
+       
+        const filteredData = data.map(({ _id, status, password, ...rest }) => ({
+            ...rest,
+            password: password
+        }));
+    
+        const doc = new jsPDF();
+    
+        // Adding Title
+        doc.setFontSize(18);
+        doc.text("User Data Report", 14, 15);
+    
+        // Adding table
+        autoTable(doc, {
+            startY: 20,
+            head: [['Name', 'Email', 'Password']],
+            body: filteredData.map(user => [user.name || "", user.email || "", user.password || ""]),
+            styles: { fontSize: 10, cellPadding: 4 },
+            headStyles: { fillColor: [22, 160, 133], textColor: 255, halign: 'center' },
+            bodyStyles: { textColor: 0 },
+            theme: 'grid',
+        });
+    
+        // Generate PDF Blob
+        const pdfBlob = doc.output('blob');
+        const url = URL.createObjectURL(pdfBlob);
+    
+        // Create a download link
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'user_data_report.pdf';
+        document.body.appendChild(link);
+        link.click();
+    
+        // Cleanup
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    }
+    const deleteHandler = async () => {
+        try {
+            const res = await axios.post('http://localhost:1007/api/website/auth/admin-delete', { _id: checkBox });
+            console.log("Delete response:", res.data);
+
+            setcheckBox([]);  // Clear selected checkboxes
+
+            if (data.length === checkBox.length) {
+                // If all records are deleted, clear the state
+                setData([]);
+                settotalPage(1);
+            } else {
+                setFlag(prev => !prev);  // Toggle flag to trigger useEffect
+            }
+        } catch (err) {
+            console.error("Error deleting:", err);
+        }
+
+        console.log("Deleting ID:", checkBox);
+    };
+
 
     return (
         <>
@@ -137,8 +223,8 @@ export default function AdminRecords({ filter, isOpen, setisOpen, detailData, se
                         </div>
 
                         <span className=" flex items-center text-red-700 bg-gray-200 shadow-gray-400 shadow-md p-1 hover:scale-110 duration-500"><MdAutoDelete onClick={() => deleteHandler()} /></span>
-                        <span className="text-green-700 flex items-center bg-gray-200 shadow-gray-400 shadow-md p-1 hover:scale-110 duration-500"><TbFileTypeCsv /></span>
-                        <span className="text-green-700 flex items-center bg-gray-200 shadow-gray-400 shadow-md p-1 hover:scale-110 duration-500"><MdOutlinePictureAsPdf /></span>
+                        <span className="text-green-700 flex items-center bg-gray-200 shadow-gray-400 shadow-md p-1 hover:scale-110 duration-500"><TbFileTypeCsv onClick={() => DownloadCSV()} /></span>
+                        <span className="text-green-700 flex items-center bg-gray-200 shadow-gray-400 shadow-md p-1 hover:scale-110 duration-500"><MdOutlinePictureAsPdf onClick={()=>DownloadPdf()}/></span>
                     </div>
                 </div>
                 <div>
